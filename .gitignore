@@ -42,3 +42,9 @@
 
 # Embedded web-server pid file
 /.web-server-pid
+
+/.idea
+/automation
+/vendor
+/bower_components
+/web/bower_components

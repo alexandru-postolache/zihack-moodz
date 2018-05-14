@@ -1,0 +1,8 @@
+services:
+    emotion.detect.method:
+        class: EmotionBundle\Api\EmotionDetect
+        arguments: ["@buzz", "%cognitiveapihost%"]
+    emotion.detect.service:
+        class: EmotionBundle\Service\EmotionDetectService
+        arguments: ["@doctrine", "@emotion.detect.method", "@session"]
+

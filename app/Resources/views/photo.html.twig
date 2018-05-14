@@ -1,0 +1,211 @@
+{% extends 'base.html.twig' %}
+
+{% block body %}
+<style>
+    body {
+        margin:0;
+        padding:0;
+    }
+    .demo-container {
+        width: 100%;
+        padding: 20px;
+        background: #f1f1f1;
+        display: block;
+        height:900px;
+    }
+    video {
+        display: block;
+        margin: 0 auto;
+        max-width: 100%;
+{#        height: auto;#}
+    }
+    .title {
+        font-weight: bold;
+    }
+    td.title {
+        padding-right: 5px;
+    }
+    video#video, canvas#canvas {
+{#        left: 16%;#}
+{#        position: absolute;#}
+        border:5px solid #000;
+        /*visibility: hidden;*/
+    }
+    canvas#photoCanvas {
+        display: none;
+    }
+    div.photos {
+        display: block;
+        width: 100%;
+    }
+    #photos canvas{
+        float:left;
+        width: 350px;
+    }
+	canvas {
+		cursor: pointer;
+	}
+	.template {
+		display:none;
+	}
+	.number {
+		padding:10px;
+		margin: 10px;
+		border:1px solid #f1f1f1;
+	}
+</style>
+
+<div class="demo-container">
+	<video id="video" width="1280" height="720" preload autoplay loop muted></video>
+</div>
+<div id="stats" class="modal fade">
+	<div class="modal-dialog" role="document">
+	<div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span aria-hidden="true">&times;</span></button>
+        <h4 class="modal-title">Emotions</h4>
+      </div>
+      <div class="modal-body">
+        	<div class="template">
+                    <table>
+                        <tr>
+                            <td class="title anger">Anger:</td><td class="anger-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title contempt">Contempt:</td><td class="contempt-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title disgust">Disgust:</td><td class="disgust-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title fear">Fear:</td><td class="fear-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title happiness">Happiness:</td><td class="happiness-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title neutral">Neutral:</td><td class="neutral-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title sadness">Sadness:</td><td class="sadness-value"></td>
+                        </tr>
+                        <tr>
+                            <td class="title surprise">Surprise:</td><td class="surprise-value"></td>
+                        </tr>
+                    </table>
+	</div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+      </div>
+    </div><!-- /.modal-content -->
+	</div>
+</div>
+<div id="photos" class="photos">
+    <canvas id="photoCanvas" width="1280" height="720"></canvas>
+	<div class="container">	
+		<div class="row">
+			
+		</div>
+	</div>
+</div>
+
+<script>
+    window.onload = function() {
+        var video = document.querySelector("#video");
+        navigator.getUserMedia = navigator.getUserMedia || navigator.webkitGetUserMedia || navigator.mozGetUserMedia || navigator.msGetUserMedia || navigator.oGetUserMedia;
+
+        var hdConstraints = {
+            video: {
+                mandatory: {
+                    minWidth: 1280,
+                    minHeight: 720
+                }
+            }
+        };
+
+        if (navigator.getUserMedia) {
+            navigator.getUserMedia(hdConstraints, handleVideo, videoError);
+        }
+
+        function handleVideo(stream) {
+            video.src = window.URL.createObjectURL(stream);
+        }
+
+        function videoError(e) {
+            console.log(e);
+        }
+
+        setInterval(function () {
+            var photoCanvas = document.getElementById('photoCanvas');
+            var photoCtx = photoCanvas.getContext('2d');
+
+            if(video.src) {
+                photoCtx.drawImage(video, 0, 0, photoCanvas.width, photoCanvas.height); // by me
+                var dataURI = photoCanvas.toDataURL('image/jpeg');
+                var image = document.createElement('img');
+                image.src = dataURI;
+//                document.getElementById('photos').appendChild(image);
+
+                $.post("/emotion", {
+                    imageData: dataURI
+                }, function (data) {
+                    var canvas = document.createElement('canvas');
+                    var context = canvas.getContext('2d');
+                    canvas.width = 1280;
+                    canvas.height = 720;
+                    context.drawImage(image, 0, 0, 1280, 720, 0, 0, 1280, 720);
+                    if(typeof data == "object") {
+                        var i = 1;
+                        var rectangles = [];
+                        var rectangle;
+						var scores = [];
+                        data.forEach(function(currentValue, index, arr){
+                            rectangles[i] = currentValue['faceRectangle'];
+                            rectangle = currentValue['faceRectangle'];
+							scores[i] = currentValue['scores'];
+                            context.rect(rectangle['left'], rectangle['top'], rectangle['width'], rectangle['height']);
+                            context.strokeStyle = "#4cc9b4";
+							context.font = "55px Arial";
+							context.fillStyle = "#4cc9b4";
+							context.fillText(i, rectangle['left'], rectangle['top']);
+                            context.lineWidth = 5;
+                            context.stroke();
+                            i++;
+                        });
+						var template = $('#stats .template')[0].outerHTML;
+                        canvas.addEventListener('click', function(e){
+							i = 1;
+							$('#stats .modal-body').html(template);
+							scores.forEach(function(currentValue, index, arr){
+								$('#stats .template').clone().appendTo('#stats .modal-body').addClass('number number-' + i).removeClass('template');
+								$('#stats div.number.number-' + i).prepend("<h2>Face number " + i + "</h2>");
+								for(var key in currentValue) {
+                                                                    if((Math.round(currentValue[key] * 100) / 100).toFixed(2) > '0.01') {
+									$('#stats div.number.number-' + i + ' table td.'+key + '-value').html((Math.round(currentValue[key] * 100) / 100).toFixed(2));
+                                                                    }else {
+                                                                        $('#stats div.number.number-' + i + ' table td.'+key + '-value').html(' - ');
+                                                                    }
+								}
+								i++;
+							});
+                        });
+                    }
+					$(canvas).attr("data-toggle", "modal").attr("data-target", "#stats").addClass('img-thumbnail').addClass('img-responsive');
+					var div = $("<div></div>").addClass('col-md-4').append(canvas);
+					var numberOfPhotos = $('#photos .row .col-md-4').length;
+					if(numberOfPhotos == 6) {
+						$('#photos .row .col-md-4').get(0).remove();
+					}
+					$('#photos .row').append(div);
+                });
+            }
+        }, 3000);
+    };
+</script>
+{% endblock %}
+{% block javascripts %}
+    {{ parent() }}
+    <script src="bower_components/tracking/build/tracking.js"></script>
+    <script src="bower_components/tracking/build/data/face-min.js"></script>
+{% endblock %}

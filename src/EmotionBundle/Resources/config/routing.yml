@@ -1,0 +1,3 @@
+emotion_homepage:
+    path:     /emotion
+    defaults: { _controller: EmotionBundle:Default:index }

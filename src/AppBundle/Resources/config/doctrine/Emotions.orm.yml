@@ -1,0 +1,58 @@
+AppBundle\Entity\Emotions:
+    type: entity
+    table: null
+    repositoryClass: AppBundle\Repository\EmotionsRepository
+    id:
+        id:
+            type: integer
+            id: true
+            generator:
+                strategy: AUTO
+    indexes:
+        session:
+            columns:
+                - session_id
+        added:
+            columns:
+                - datetime
+    fields:
+        sessionId:
+            type: string
+            length: 255
+            column: session_id
+        anger:
+            type: decimal
+            precision: 10
+            scale: '7'
+        contempt:
+            type: decimal
+            precision: 10
+            scale: '7'
+        disgust:
+            type: decimal
+            precision: 10
+            scale: '7'
+        fear:
+            type: decimal
+            precision: 10
+            scale: '7'
+        happiness:
+            type: decimal
+            precision: 10
+            scale: '7'
+        neutral:
+            type: decimal
+            precision: 10
+            scale: '7'
+        sadness:
+            type: decimal
+            precision: 10
+            scale: '7'
+        surprise:
+            type: decimal
+            precision: 10
+            scale: '7'
+        datetime:
+            type: datetime
+            nullable: false
+    lifecycleCallbacks: {  }

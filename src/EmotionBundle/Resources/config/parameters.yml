@@ -1,0 +1,4 @@
+parameters:
+    cognitiveApiHost: 'https://api.projectoxford.ai/emotion/v1.0/'
+    apiKeys:
+        - 'e0b1b4fed1f244d58373bc58812d2b49'

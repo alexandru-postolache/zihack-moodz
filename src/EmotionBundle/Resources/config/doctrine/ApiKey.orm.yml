@@ -1,0 +1,16 @@
+# ORM definition of the User model.
+EmotionBundle\Entity\ApiKey:
+    type: entity
+    table: api_keys
+    id:
+        apiKey:
+            type: string
+            id: true
+            length: 50
+    fields:
+        lastUsedDate:
+            type: datetime
+            nullable: false
+            options:
+                default: CURRENT_TIMESTAMP
+
