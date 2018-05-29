@@ -60,6 +60,11 @@
         "incenteev-parameters": {
             "file": "app/config/parameters.yml"
         },
-        "branch-alias": null
+        "branch-alias": null,
+        "heroku": {
+            "compile": [
+                "chmod 777 /var/lib/php/sessions"
+            ]
+        }
     }
 }
