@@ -51,6 +51,11 @@
         ]
     },
     "extra": {
+        "heroku": {
+            "compile": [
+                "chmod 777 /var/lib/php/sessions"
+            ]
+        },
         "symfony-app-dir": "app",
         "symfony-bin-dir": "bin",
         "symfony-var-dir": "var",
@@ -61,10 +66,5 @@
             "file": "app/config/parameters.yml"
         },
         "branch-alias": null,
-        "heroku": {
-            "compile": [
-                "chmod 777 /var/lib/php/sessions"
-            ]
-        }
     }
 }
